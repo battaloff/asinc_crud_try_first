@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My App</title>
+    <script>
+        // Подключение к WebSocket-соединению
+        var socket = new WebSocket('ws://localhost:8000/ws/crud/');
+
+        // Обработка события открытия соединения
+        socket.onopen = function() {
+            console.log('WebSocket connection established.');
+        };
+
+        // Обработка события получения сообщения от сервера
+        socket.onmessage = function(event) {
+            var data = JSON.parse(event.data);
+            var crudObjectId = data.crud_object_id;
+            var isReady = data.is_ready;
+
+            // Обновление вашего интерфейса с использованием полученных данных
+            // Например, обновление статуса "Ready" для соответствующего объекта
+        };
+
+        // Функция для отправки сообщения на сервер
+        function setReady(crudObjectId, isReady) {
+            var message = {
+                crud_object_id: crudObjectId,
+                is_ready: isReady
+            };
+            socket.send(JSON.stringify(message));
+        }
+    </script>
+</head>
+
+<body>
+
+
+<table>
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Date Added</th>
+        <th>Ready</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for crud_object in crud_objects %}
+    <tr>
+        <td>{{ crud_object.name }}</td>
+        <td>{{ crud_object.description }}</td>
+        <td>{{ crud_object.date_added }}</td>
+        <td id="ready-{{ crud_object.pk }}">{{ crud_object.ready_to }}</td>
+        <td>
+            <button type="button" onclick="setReady({{ crud_object.pk }})">Set Ready</button>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="5">No objects found.</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+
+<script>
+    function setReady(pk) {
+      var readyCell = document.getElementById("ready-" + pk);
+      var readyValue = readyCell.innerText.trim();
+
+      if (readyValue === "True") {
+        readyCell.innerText = "False";
+      } else {
+        readyCell.innerText = "True";
+      }
+    }
+</script>
+
+</body>
+</html>
